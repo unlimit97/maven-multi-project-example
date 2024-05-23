@@ -1,0 +1,27 @@
+version: 0.2
+
+env:
+  variables:
+    PROJECT_NAME: "CodeBuild-Synopsys-Detect"
+#  parameter-store:
+#    BLACKDUCK_URL: "Detect-Blackduck-URL"
+#    BLACKDUCK_TOKEN: "Detect-Blackduck-Token"
+
+phases:
+  install:
+    commands:
+      - curl -LOk https://detect.synopsys.com/detect9.sh
+      - chmod +x ./detect9.sh
+  build:
+    commands:
+#      - echo $BLACKDUCK_URL
+      - cd MavenReactor
+      - mvn clean install
+      - cd ..
+      - ls -alF
+  post_build:
+    commands:
+      - bash ./detect9.sh --blackduck.url=$BLACKDUCK_URL --blackduck.api.token=$BLACKDUCK_TOKEN --blackduck.trust.cert=true --detect.detector.search.depth=1 --detect.detector.search.continue=true --detect.project.name=$PROJECT_NAME --detect.project.version.name=$CODEBUILD_BUILD_ID --logging.level.com.synopsys.integration=DEBUG
+
+artifacts:
+  discard-paths: yes
